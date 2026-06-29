@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kontakte Manager</title>
+    
+    <!-- Link to our CSS styling -->
+    <link rel="stylesheet" href="style.css">
+    <!-- Link to our JavaScript logic (defer ensures it loads after HTML) -->
+    <script src="app.js" defer></script>
+</head>
+<body>
+    <header>
+        <h1>Enterprise Kontakte Manager</h1>
+    </header>
+
+    <main>
+        <section class="form-section">
+            <h2>Kontakt hinzufügen / bearbeiten</h2>
+            <form id="kontakt-form">
+                <input type="hidden" id="kontakt-id">
+                
+                <div class="form-group">
+                    <label for="name">Name:</label>
+                    <input type="text" id="name" name="name" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="email">E-Mail:</label>
+                    <input type="email" id="email" name="email" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="telefon">Telefon:</label>
+                    <input type="text" id="telefon" name="telefon" required>
+                </div>
+                
+                <button type="submit" id="save-btn">Kontakt Speichern</button>
+                <button type="button" id="cancel-btn" style="display: none;">Abbrechen</button>
+            </form>
+        </section>
+
+        <section class="table-section">
+            <h2>Aktuelle Kontakte</h2>
+            <table id="kontakte-table">
+                <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>E-Mail</th>
+                        <th>Telefon</th>
+                        <th>Aktionen</th>
+                    </tr>
+                </thead>
+                <tbody id="kontakte-body">
+                </tbody>
+            </table>
+        </section>
+    </main>
+</body>
+</html>
