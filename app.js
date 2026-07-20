@@ -27,6 +27,64 @@ async function fetchKontakte() {
         alert("System Error: Failed to connect to the backend server. Is the Python Flask engine running?");
     }
 }
+// 1. Hook into the Form: We tell the system to monitor the specific HTML form for activity.
+const kontaktForm = document.getElementById('kontakt-form');
+
+// 2. The Event Listener: We attach a "listener" that waits for the user to click the submit button.
+kontaktForm.addEventListener('submit', async function(event) {
+    
+    // SYSTEM OVERRIDE: Browsers naturally try to refresh the page when a form is submitted.
+    // In a decoupled architecture, this breaks our application. We must block the default behavior.
+    event.preventDefault();
+
+    // 3. Data Extraction: Read the raw text strings currently sitting in the input fields.
+    const inputName = document.getElementById('name').value;
+    const inputEmail = document.getElementById('email').value;
+    const inputTelefon = document.getElementById('telefon').value;
+
+    // 4. Payload Packaging: Convert the raw variables into a structured JavaScript Object.
+    // This perfectly matches the schema our SQLite database expects.
+    const payload = {
+        name: inputName,
+        email: inputEmail,
+        telefon: inputTelefon
+    };
+
+    try {
+        // 5. Network Transmission: Execute the asynchronous POST request to the Python API.
+        const response = await fetch('http://127.0.0.1:3000/api/kontakte', {
+            method: 'POST', 
+            headers: {
+                // The Network Header: This tells the Python Flask server exactly what data format is arriving.
+                // If we don't declare application/json, Flask will reject the packet as a security risk.
+                'Content-Type': 'application/json'
+            },
+            // 6. Serialization: Convert the JavaScript Object into a strict JSON string for transit over the network.
+            body: JSON.stringify(payload)
+        });
+
+        // 7. Server Response Handling: Did the Python server accept the payload?
+        if (response.ok) {
+            console.log("System Success: Contact successfully written to the database.");
+            
+            // Clear the form fields so the user can enter a new contact
+            kontaktForm.reset();
+            
+            // Re-trigger our READ function to pull the newly updated list from the server
+            // (Assuming your READ function is named fetchKontakte or loadKontakte)
+            fetchKontakte(); 
+        } else {
+            // If Python returns a 400 or 500 series error, throw an exception.
+            throw new Error(`HTTP Error: ${response.status}`);
+        }
+        
+    } catch (error) {
+        // 8. System Logging: If the network fails entirely (e.g., Python server crashed).
+        console.error("Network Transmission Failed:", error);
+        alert("System Error: Could not connect to the database server.");
+    }
+});
+
 
 // Function to dynamically inject database records into the HTML Document Object Model (DOM)
 function renderTable(kontakte) {
