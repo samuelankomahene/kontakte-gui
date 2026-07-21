@@ -31,19 +31,18 @@ async function fetchKontakte() {
 const kontaktForm = document.getElementById('kontakt-form');
 
 // 2. The Event Listener: We attach a "listener" that waits for the user to click the submit button.
+// The Master Form Router: Handles both CREATE (POST) and UPDATE (PUT) operations
 kontaktForm.addEventListener('submit', async function(event) {
-    
-    // SYSTEM OVERRIDE: Browsers naturally try to refresh the page when a form is submitted.
-    // In a decoupled architecture, this breaks our application. We must block the default behavior.
     event.preventDefault();
 
-    // 3. Data Extraction: Read the raw text strings currently sitting in the input fields.
+    // 1. Data Extraction
     const inputName = document.getElementById('name').value;
     const inputEmail = document.getElementById('email').value;
     const inputTelefon = document.getElementById('telefon').value;
+    
+    // 2. State Detection: Read the hidden field to determine the operation type
+    const currentId = document.getElementById('kontakt-id').value;
 
-    // 4. Payload Packaging: Convert the raw variables into a structured JavaScript Object.
-    // This perfectly matches the schema our SQLite database expects.
     const payload = {
         name: inputName,
         email: inputEmail,
@@ -51,37 +50,48 @@ kontaktForm.addEventListener('submit', async function(event) {
     };
 
     try {
-        // 5. Network Transmission: Execute the asynchronous POST request to the Python API.
-        const response = await fetch('http://127.0.0.1:3000/api/kontakte', {
-            method: 'POST', 
-            headers: {
-                // The Network Header: This tells the Python Flask server exactly what data format is arriving.
-                // If we don't declare application/json, Flask will reject the packet as a security risk.
-                'Content-Type': 'application/json'
-            },
-            // 6. Serialization: Convert the JavaScript Object into a strict JSON string for transit over the network.
-            body: JSON.stringify(payload)
-        });
+        let response;
 
-        // 7. Server Response Handling: Did the Python server accept the payload?
+        // 3. The Logic Gate (Traffic Routing)
+        if (currentId) {
+            // Path A: UPDATE State Detected. Execute a PUT request to the specific database ID.
+            response = await fetch(`http://127.0.0.1:3000/api/kontakte/${currentId}`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            });
+        } else {
+            // Path B: CREATE State Detected. Execute a POST request to generate a new record.
+            response = await fetch('http://127.0.0.1:3000/api/kontakte', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            });
+        }
+
+        // 4. Server Response & State Reset
         if (response.ok) {
-            console.log("System Success: Contact successfully written to the database.");
+            console.log("System Success: Database transaction complete.");
             
-            // Clear the form fields so the user can enter a new contact
+            // Wipe the form fields clean
             kontaktForm.reset();
             
-            // Re-trigger our READ function to pull the newly updated list from the server
-            // (Assuming your READ function is named fetchKontakte or loadKontakte)
+            // CRITICAL: Clear the hidden ID so the system returns to default "Create" mode
+            document.getElementById('kontakt-id').value = '';
+            
+            // Reset the UI buttons back to default state
+            document.getElementById('save-btn').textContent = "Kontakt Speichern";
+            document.getElementById('cancel-btn').style.display = 'none';
+            
+            // Synchronize the table with the new database state
             fetchKontakte(); 
         } else {
-            // If Python returns a 400 or 500 series error, throw an exception.
             throw new Error(`HTTP Error: ${response.status}`);
         }
         
     } catch (error) {
-        // 8. System Logging: If the network fails entirely (e.g., Python server crashed).
         console.error("Network Transmission Failed:", error);
-        alert("System Error: Could not connect to the database server.");
+        alert("System Error: Could not execute the database transaction.");
     }
 });
 
@@ -112,11 +122,81 @@ function renderTable(kontakte) {
     });
 }
 
-// Placeholder functions for future database operations
-function editKontakt(id) {
-    console.log(`Edit requested for Database ID: ${id}`);
+// Function to capture an existing record and inject it into the HTML presentation layer
+async function editKontakt(id) {
+    try {
+        // 1. Data Retrieval: Fetch the current database state from the Python backend.
+        // We pull the full list to locate the specific record we want to edit.
+        const response = await fetch('http://127.0.0.1:3000/api/kontakte');
+        
+        if (!response.ok) {
+            throw new Error(`HTTP Error: ${response.status}`);
+        }
+        
+        const kontakte = await response.json();
+        
+        // 2. Data Parsing: Search the JSON array for the exact database ID
+        const targetKontakt = kontakte.find(k => k.id === id);
+
+        if (!targetKontakt) {
+            console.error(`System Error: Record ID ${id} not found in the payload.`);
+            return;
+        }
+
+        // 3. State Injection: Populate the HTML form fields with the database values
+        document.getElementById('name').value = targetKontakt.name;
+        document.getElementById('email').value = targetKontakt.email;
+        document.getElementById('telefon').value = targetKontakt.telefon;
+
+        // 4. Context Tracking: Inject the ID into the hidden field.
+        // This is the critical step. If this field has a value, our system knows it is in "Edit Mode".
+        document.getElementById('kontakt-id').value = targetKontakt.id;
+
+        // 5. Visual Feedback: Alter the UI to clearly indicate the system state to the user
+        document.getElementById('save-btn').textContent = "Änderungen speichern";
+        document.getElementById('cancel-btn').style.display = 'inline-block';
+
+        // 6. Convenience: Automatically scroll the viewport to the top where the form is located
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+
+    } catch (error) {
+        console.error("System Data Retrieval Failed:", error);
+        alert("System Error: Could not pull the record from the database.");
+    }
 }
 
-function deleteKontakt(id) {
-    console.log(`Delete requested for Database ID: ${id}`);
+// Function to execute a targeted DELETE network request to the Python server
+async function deleteKontakt(id) {
+    
+    // 1. System Safeguard: Never delete infrastructure data without user confirmation.
+    // This prevents accidental clicks from destroying database records.
+    const isConfirmed = confirm("System Warning: Are you sure you want to delete this contact?");
+    
+    if (!isConfirmed) {
+        return; // Abort the operation if the user clicks "Cancel"
+    }
+
+    try {
+        // 2. Network Transmission: We append the specific ID directly to the API URL.
+        // Example: If ID is 5, the request goes to http://127.0.0.1:3000/api/kontakte/5
+        const response = await fetch(`http://127.0.0.1:3000/api/kontakte/${id}`, {
+            method: 'DELETE' // Explicitly command the Python server to destroy the record
+        });
+
+        // 3. Server Response Handling
+        if (response.ok) {
+            console.log(`System Success: Record ID ${id} securely wiped from the database.`);
+            
+            // 4. State Synchronization: The database has changed. 
+            // We must command the frontend to pull a fresh copy of the data.
+            fetchKontakte(); 
+        } else {
+            throw new Error(`HTTP Error: ${response.status}`);
+        }
+        
+    } catch (error) {
+        // 5. System Logging
+        console.error("Network Transmission Failed:", error);
+        alert("System Error: Could not reach the server to execute the delete command.");
+    }
 }
