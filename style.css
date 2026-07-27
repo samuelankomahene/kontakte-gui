@@ -1,0 +1,134 @@
+/* Base Reset & Typography (Forces consistent rendering across all browsers) */
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+}
+
+body {
+    background-color: #f4f7f6;
+    color: #333;
+    padding: 20px;
+    line-height: 1.6;
+}
+
+header {
+    text-align: center;
+    margin-bottom: 30px;
+}
+
+/* System Grid Architecture */
+main {
+    max-width: 1000px;
+    margin: 0 auto;
+    display: grid;
+    grid-template-columns: 1fr; /* Mobile-first: stacks in a single column */
+    gap: 30px;
+}
+
+/* Media Query: Automatically splits into two columns on larger screens */
+@media (min-width: 768px) {
+    main {
+        grid-template-columns: 1fr 2fr; /* Form takes 1/3, Table takes 2/3 of space */
+    }
+}
+
+/* Data Entry Form Infrastructure */
+.form-section {
+    background: #fff;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+}
+
+.form-group {
+    margin-bottom: 15px;
+}
+
+label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: bold;
+}
+
+input[type="text"],
+input[type="email"] {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+}
+
+/* Button UI Components */
+button {
+    padding: 10px 15px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-weight: bold;
+    color: #fff;
+    width: 100%;
+    margin-bottom: 10px;
+    transition: background-color 0.2s ease-in-out;
+}
+
+#save-btn {
+    background-color: #28a745; /* Success Green */
+}
+
+#save-btn:hover {
+    background-color: #218838;
+}
+
+#cancel-btn {
+    background-color: #6c757d;
+}
+
+/* Dynamic Buttons (These will be injected by our JavaScript later) */
+.delete-btn {
+    background-color: #dc3545; /* Danger Red */
+    width: auto;
+    padding: 5px 10px;
+    margin: 0 5px;
+}
+
+.delete-btn:hover {
+    background-color: #c82333;
+}
+
+.edit-btn {
+    background-color: #007bff; /* Action Blue */
+    width: auto;
+    padding: 5px 10px;
+    margin: 0 5px;
+}
+
+.edit-btn:hover {
+    background-color: #0056b3;
+}
+
+/* Database Rendering Table */
+.table-section {
+    background: #fff;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    overflow-x: auto; /* Prevents table from breaking mobile screens */
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+th, td {
+    padding: 12px;
+    text-align: left;
+    border-bottom: 1px solid #ddd;
+}
+
+/* UI Feedback Indicator */
+tbody tr:hover {
+    background-color: #f1f1f1; 
+}
