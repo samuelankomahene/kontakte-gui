@@ -1,24 +1,23 @@
-# Kontakte GUI - Frontend Presentation Layer
+# Kontakte GUI: Decoupled Presentation Layer
 
-## Overview
-This repository contains the frontend presentation layer for a complete decoupled software ecosystem built during my IT-Praktikum at Hamann Solutions. It serves as the graphical user interface (GUI) designed to interact asynchronously with a Python/Flask backend and an SQLite database.
+## Architecture Overview
+This repository contains the static presentation layer (HTML/CSS/JS) for the Kontakte application ecosystem. It demonstrates a strict decoupling of frontend UI from backend infrastructure, a core principle in secure systems design.
 
-## System Architecture
-As a System Integrator in training, I engineered this frontend to be completely independent of the backend server. 
-* **Network Pipelines:** Utilizes native JavaScript `fetch()` to execute RESTful API operations (GET, POST, PUT, DELETE).
-* **State Management:** Dynamically renders UI components based on the JSON payload received from the server.
-* **CORS Compliance:** Configured to securely communicate across different local network ports during development.
+### Technology Stack
+- **Structure & Styling:** Semantic HTML5, CSS3 Grid/Flexbox
+- **Logic:** Vanilla JavaScript (ES6)
+- **Networking:** Asynchronous `fetch()` API
+- **Deployment:** GitHub Pages (Static Hosting)
 
-## Tech Stack
-| Component | Technology |
-| :--- | :--- |
-| **Markup & Styling** | HTML5, CSS3 (Vanilla) |
-| **Logic & Networking** | JavaScript (ES6+) |
-| **Version Control** | Git & GitHub |
+## Network Integration & CORS
+This frontend contains no backend logic or local database access. It acts purely as a REST client. 
 
-## Development Setup
-Because this is a decoupled static frontend, no complex build tools are required for local testing.
+All HTTP CRUD operations (GET, POST, PUT, DELETE) are dynamically routed across the public internet to a secure Python/Flask API backend hosted on an Ubuntu Hetzner Cloud VPS (`2.28.105.240`). 
 
-1. Clone the repository:
-   ```bash
-   git clone [https://github.com/samuelankomahene/kontakte-gui.git](https://github.com/samuelankomahene/kontakte-gui.git)
+**Security Note:** To permit this cross-origin network traffic, the remote Python infrastructure is explicitly configured with Cross-Origin Resource Sharing (CORS) middleware, ensuring the browser allows the Hetzner server to accept requests originating from this static frontend.
+
+## Local Development Setup
+To test this interface locally:
+1. Clone this repository.
+2. Open `index.html` in any modern web browser.
+3. *Note: A live internet connection is required, as the application must reach the remote Hetzner VPS to populate the database tables.*
