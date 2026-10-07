@@ -1,7 +1,7 @@
 // --- INFRASTRUCTURE CONFIGURATION ---
 // Target the Hetzner Production VPS. 
 // Local loopback (127.0.0.1) is invalid for decoupled remote clients.
-const API_BASE_URL = 'http://2.28.105.240/api/kontakte';
+const API_BASE_URL = 'https://api.sam-ankomahene.de/api/kontakte';
 
 document.addEventListener('DOMContentLoaded', () => {
     fetchKontakte();
